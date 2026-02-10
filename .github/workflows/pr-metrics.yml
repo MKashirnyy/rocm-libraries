@@ -28,7 +28,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install rocmetrics
-        run: pip install git+https://github.com/ROCm/rocMETRICS.git
+        run: pip install pip install git+https://github.com/ROCm/rocMETRICS.git@feature/pr-delta
 
       - name: Run PR Delta Analysis
         id: pr-delta
