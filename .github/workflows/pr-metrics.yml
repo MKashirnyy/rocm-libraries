@@ -3,7 +3,7 @@
 #   .github/workflows/pr-metrics.yml
 #
 # Prerequisites:
-# - rocMETRICS package installed (pip install git+https://github.com/ROCm/rocMETRICS.git)
+# - rocMETRICS package installed (pip install git+https://github.com/MKashirnyy/rocMETRICS.git@feature/pr-delta)
 # - gh CLI is pre-installed on GitHub Actions runners
 
 name: PR Metrics
@@ -28,7 +28,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install rocmetrics
-        run: pip install pip install git+https://github.com/ROCm/rocMETRICS.git@feature/pr-delta
+        run: pip install git+https://github.com/MKashirnyy/rocMETRICS.git@feature/pr-delta
 
       - name: Run PR Delta Analysis
         id: pr-delta
