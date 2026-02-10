@@ -4,7 +4,7 @@
 #
 # Prerequisites:
 # - rocMETRICS package installed (pip install git+https://github.com/ROCm/rocMETRICS.git)
-# - Full git history (fetch-depth: 0)
+# - gh CLI is pre-installed on GitHub Actions runners
 
 name: PR Metrics
 
@@ -17,10 +17,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout with full history
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        # Default fetch-depth: 1 is sufficient for lizard analysis of HEAD
+        # Historical data is fetched via GitHub API
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,9 +32,13 @@ jobs:
 
       - name: Run PR Delta Analysis
         id: pr-delta
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           rocmetrics pr-delta \
-            --repo-path . \
+            --use-github-api \
+            --github-owner ${{ github.repository_owner }} \
+            --github-repo ${{ github.event.repository.name }} \
             --base-ref ${{ github.event.pull_request.base.sha }} \
             --head-ref ${{ github.event.pull_request.head.sha }} \
             --component rocm-libraries \
@@ -42,7 +46,13 @@ jobs:
             --author "${{ github.event.pull_request.user.login }}" \
             --branch "${{ github.head_ref }}" \
             --base-branch "${{ github.base_ref }}" \
+            --pr-url "${{ github.event.pull_request.html_url }}" \
+            --ci-job-name "${{ github.job }}" \
+            --ci-run-id "${{ github.run_id }}" \
             > pr-delta.json
+
+      # Hotspot warnings are emitted to stderr during analysis
+      # and appear as workflow annotations automatically
 
       - name: Display PR Delta Results
         run: |
@@ -53,8 +63,9 @@ jobs:
             functions_analyzed,
             ccn_regressions,
             ccn_improvements,
-            total_churn,
-            churn_ratio,
+            churn_pr,
+            churn_historical,
+            hotspot_files_count,
             max_risk_score
           }' >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
@@ -66,6 +77,12 @@ jobs:
           path: pr-delta.json
           retention-days: 30
 
+      # TODO: Hotspot detection currently uses absolute threshold (20 commits).
+      # Future improvement: Switch to Pareto (P95) relative to repo average.
+      # This would require either:
+      # - Caching P95 from the last datacollector batch report
+      # - Additional API request to sample repo-wide churn
+
       # TODO: Add ES upload when credentials are available
       # - name: Upload to Elasticsearch
       #   if: success()
@@ -74,7 +91,9 @@ jobs:
       #     ELASTICSEARCH_API_KEY: ${{ secrets.ES_API_KEY }}
       #   run: |
       #     rocmetrics pr-delta \
-      #       --repo-path . \
+      #       --use-github-api \
+      #       --github-owner ${{ github.repository_owner }} \
+      #       --github-repo ${{ github.event.repository.name }} \
       #       --base-ref ${{ github.event.pull_request.base.sha }} \
       #       --head-ref ${{ github.event.pull_request.head.sha }} \
       #       --component rocm-libraries \
