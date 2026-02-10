@@ -632,7 +632,7 @@ def kernel_rodata(name: str, gfx_arch: Tuple[int, int, int]):
         header += f'.amdhsa_wavefront_size32 1\n'
     header += f'.end_amdhsa_kernel\n'
     return header
-
+# one more test entry!
 @dataclass
 class KernelArgument:
     size: int

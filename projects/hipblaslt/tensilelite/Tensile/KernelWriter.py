@@ -6062,3 +6062,4 @@ class Assert():
                        comment="assert_vector_diff add expectedScalarDiff"))
         module.add(self.eq(vgpr(cmpvtmp), v1, vtmp, cookie))
         return module
+# one day this code would become readable and regain its former glory!

@@ -22,6 +22,8 @@ set(SUPPORTED_ARCHITECTURES
     "gfx950:xnack+"    
 )
 
+# test change there
+
 # Base architectures - used when "all" is specified for GPU_TARGETS
 # Different base architectures will be chosen depending on the build mode.
 # All base architectures must be in the SUPPORTED_ARCHITECTURES list.

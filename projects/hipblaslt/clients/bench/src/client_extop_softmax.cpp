@@ -99,6 +99,7 @@ void initData(DType* data, std::size_t numElements, hipblaslt_initialization ini
 {
     switch(initMethod)
     {
+    // test change here...
     case hipblaslt_initialization::rand_int:
         hipblaslt_init<DType>(data, numElements, 1, 1);
         break;
