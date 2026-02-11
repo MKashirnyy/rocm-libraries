@@ -17,11 +17,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        # Default fetch-depth: 1 is sufficient for lizard analysis of HEAD
-        # Historical data is fetched via GitHub API
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
