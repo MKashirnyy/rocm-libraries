@@ -17,6 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        # Default fetch-depth: 1 is sufficient for lizard analysis of HEAD
+        # Historical data is fetched via GitHub API
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -78,22 +83,13 @@ jobs:
       # - Caching P95 from the last datacollector batch report
       # - Additional API request to sample repo-wide churn
 
-      # TODO: Add ES upload when credentials are available
-      # - name: Upload to Elasticsearch
-      #   if: success()
-      #   env:
-      #     ELASTICSEARCH_HOST: ${{ secrets.ES_HOST }}
-      #     ELASTICSEARCH_API_KEY: ${{ secrets.ES_API_KEY }}
-      #   run: |
-      #     rocmetrics pr-delta \
-      #       --use-github-api \
-      #       --github-owner ${{ github.repository_owner }} \
-      #       --github-repo ${{ github.event.repository.name }} \
-      #       --base-ref ${{ github.event.pull_request.base.sha }} \
-      #       --head-ref ${{ github.event.pull_request.head.sha }} \
-      #       --component rocm-libraries \
-      #       --pr-number ${{ github.event.pull_request.number }} \
-      #       --author "${{ github.event.pull_request.user.login }}" \
-      #       --branch "${{ github.head_ref }}" \
-      #       --base-branch "${{ github.base_ref }}" \
-      #       --upload rocm-libraries-pr-delta-prod1
+      - name: Upload to Elasticsearch
+        if: success()
+        env:
+          ELASTICSEARCH_HOST: ${{ secrets.ES_HOST }}
+          ELASTICSEARCH_API_KEY: ${{ secrets.ES_API_KEY }}
+        run: |
+          rocmetrics upload rocm-libraries-pr-delta \
+            --file pr-delta.json \
+            --no-defaults \
+            --no-verify-certs
